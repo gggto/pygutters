@@ -24,25 +24,25 @@ jobs:
         with:
           maturin-version: v0.11.5
           target: x86_64
-          args: --release --out dist -m Cargo.toml
+          args: --release -m Cargo.toml
       - name: Install built wheel - x86_64
         run: |
-          pip install --find-links dist gutters --force-reinstall
+          pip install --find-links target/wheels gutters --force-reinstall
           python -c "import gutters"
       - name: Build wheels - universal2
         uses: messense/maturin-action@v1
         with:
           maturin-version: v0.11.5
-          args: --release --universal2 --out dist --no-sdist -m Cargo.toml
+          args: --release --universal2 --no-sdist -m Cargo.toml
       - name: Install built wheel - universal2
         run: |
-          pip install --find-links dist gutters --force-reinstall
+          pip install --find-links target/wheels gutters --force-reinstall
           python -c "import gutters"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: dist
+          path: target/wheels
 
   windows:
     runs-on: windows-latest
@@ -66,16 +66,16 @@ jobs:
         with:
           maturin-version: v0.11.5
           target: ${{ matrix.target }}
-          args: --release --out dist --no-sdist -m Cargo.toml
+          args: --release --no-sdist -m Cargo.toml
       - name: Install built wheel
         run: |
-          pip install --find-links dist gutters --force-reinstall
+          pip install --find-links target/wheels gutters --force-reinstall
           python -c "import gutters"
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: dist
+          path: target/wheels
 
   linux:
     runs-on: ubuntu-latest
@@ -94,17 +94,17 @@ jobs:
         maturin-version: v0.11.5
         target: ${{ matrix.target }}
         manylinux: auto
-        args: --release --out dist --no-sdist -m Cargo.toml
+        args: --release --no-sdist -m Cargo.toml
     - name: Install built wheel
       if: matrix.target == 'x86_64'
       run: |
-        pip install --find-links dist gutters --force-reinstall
+        pip install --find-links target/wheels gutters --force-reinstall
         python -c "import gutters"
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
         name: wheels
-        path: dist
+        path: target/wheels
 
   linux-cross:
     runs-on: ubuntu-latest
@@ -122,7 +122,7 @@ jobs:
         maturin-version: v0.11.5
         target: ${{ matrix.target }}
         manylinux: auto
-        args: --release --out dist --no-sdist -m Cargo.toml
+        args: --release --no-sdist -m Cargo.toml
     - uses: uraimo/run-on-arch-action@v2.0.5
       if: matrix.target != 'ppc64'
       name: Install built wheel
@@ -130,9 +130,9 @@ jobs:
         arch: ${{ matrix.target }}
         distro: ubuntu18.04
         githubToken: ${{ github.token }}
-        # Mount the dist directory as /artifacts in the container
+        # Mount the target/wheels directory as /artifacts in the container
         dockerRunArgs: |
-          --volume "${PWD}/dist:/artifacts"
+          --volume "${PWD}/target/wheels:/artifacts"
         install: |
           apt-get update
           apt-get install -y --no-install-recommends python3 python3-pip
@@ -145,7 +145,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: wheels
-        path: dist
+        path: target/wheels
 
   release:
     name: Release

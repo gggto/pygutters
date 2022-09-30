@@ -32,6 +32,7 @@ jobs:
       - name: Build wheels - universal2
         uses: messense/maturin-action@v1
         with:
+          maturin-version: v0.11.5
           args: --release --universal2 --out dist --no-sdist -m Cargo.toml
       - name: Install built wheel - universal2
         run: |
